@@ -1,0 +1,200 @@
+import cv2
+import glob
+import numpy as np
+ 
+def calibrate_camera(images_folder):
+    images_names = sorted(glob.glob(images_folder))
+    images = []
+    for imname in images_names:
+        im = cv2.imread(imname, cv2.IMREAD_GRAYSCALE)
+        images.append(im)
+ 
+    #criteria used by checkerboard pattern detector.
+    #Change this if the code can't find the checkerboard
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+ 
+    rows = 6 #number of checkerboard rows.
+    columns = 9 #number of checkerboard columns.
+    world_scaling = 1. #0.0186    # meters
+    shape = (rows, columns)
+ 
+    #coordinates of squares in the checkerboard world space
+    objp = np.zeros((rows*columns,3), np.float32)
+    objp[:,:2] = np.mgrid[0:rows,0:columns].T.reshape(-1,2)
+    objp = world_scaling* objp
+ 
+    #frame dimensions. Frames should be the same size.
+    width = images[0].shape[1]
+    height = images[0].shape[0]
+ 
+    #Pixel coordinates of checkerboards
+    imgpoints = [] # 2d points in image plane.
+ 
+    #coordinates of the checkerboard in checkerboard world space.
+    objpoints = [] # 3d point in real world space
+ 
+
+    for frame in images:
+        gray = frame
+ 
+        #find the checkerboard
+        ret, corners = cv2.findChessboardCorners(gray, shape, None)
+ 
+        if ret == True:
+ 
+            #Convolution size used to improve corner detection. Don't make this too large.
+            conv_size = (11, 11)
+ 
+            #opencv can attempt to improve the checkerboard coordinates
+            corners = cv2.cornerSubPix(gray, corners, conv_size, (-1, -1), criteria)
+            cv2.drawChessboardCorners(frame, shape, corners, ret)
+            # cv2.imshow('img', frame)
+ 
+            objpoints.append(objp)
+            imgpoints.append(corners)
+
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+ 
+    ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, (width, height), None, None)
+    print('rmse:', ret)
+    print('camera matrix:\n', mtx)
+    print('distortion coeffs:', dist)
+    print('Rs:\n', rvecs)
+    print('Ts:\n', tvecs)
+ 
+    return mtx, dist
+
+
+def stereo_calibrate(mtx1, dist1, mtx2, dist2, left_images, right_images):
+    #read the synched frames
+    images_names_l = glob.glob(left_images)
+    images_names_l = sorted(images_names_l)
+    c1_images_names = images_names_l
+    
+    images_names_r = glob.glob(right_images)
+    images_names_r = sorted(images_names_r)
+    c2_images_names = images_names_r
+ 
+    c1_images = []
+    c2_images = []
+    for im1, im2 in zip(c1_images_names, c2_images_names):
+        _im = cv2.imread(im1, cv2.IMREAD_GRAYSCALE)
+        c1_images.append(_im)
+ 
+        _im = cv2.imread(im2, cv2.IMREAD_GRAYSCALE)
+        c2_images.append(_im)
+ 
+    #change this if stereo calibration not good.
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.0001)
+ 
+    rows = 6 #number of checkerboard rows.
+    columns = 9 #number of checkerboard columns.
+    world_scaling = 1. #change this to the real world square size. Or not.
+    shape = (rows, columns)
+ 
+    #coordinates of squares in the checkerboard world space
+    objp = np.zeros((rows*columns,3), np.float32)
+    objp[:,:2] = np.mgrid[0:rows,0:columns].T.reshape(-1,2)
+    objp = world_scaling* objp
+ 
+    #frame dimensions. Frames should be the same size.
+    width = c1_images[0].shape[1]
+    height = c1_images[0].shape[0]
+ 
+    #Pixel coordinates of checkerboards
+    imgpoints_left = [] # 2d points in image plane.
+    imgpoints_right = []
+ 
+    #coordinates of the checkerboard in checkerboard world space.
+    objpoints = [] # 3d point in real world space
+ 
+    for frame1, frame2 in zip(c1_images, c2_images):
+        # gray1 = cv2.cvtColor(frame1, cv2.IMREAD_GRAYSCALE)
+        # gray2 = cv2.cvtColor(frame2, cv2.IMREAD_GRAYSCALE)
+        c_ret1, corners1 = cv2.findChessboardCorners(frame1, shape, None)
+        c_ret2, corners2 = cv2.findChessboardCorners(frame2, shape, None)
+ 
+        if c_ret1 == True and c_ret2 == True:
+            corners1 = cv2.cornerSubPix(frame1, corners1, (11, 11), (-1, -1), criteria)
+            corners2 = cv2.cornerSubPix(frame2, corners2, (11, 11), (-1, -1), criteria)
+ 
+            cv2.drawChessboardCorners(frame1, shape, corners1, c_ret1)
+            # cv2.imshow('img', frame1)
+ 
+            cv2.drawChessboardCorners(frame2, shape, corners2, c_ret2)
+            # cv2.imshow('img2', frame2)
+            # k = cv2.waitKey(500)
+ 
+            objpoints.append(objp)
+            imgpoints_left.append(corners1)
+            imgpoints_right.append(corners2)
+ 
+    stereocalibration_flags = cv2.CALIB_FIX_INTRINSIC # cv2.CALIB_FIX_INTRINSIC # cv2.CALIB_USE_INTRINSIC_GUESS
+    ret, K1, dist1, K2, dist2, R, T, E, F = cv2.stereoCalibrate(objpoints, imgpoints_left, imgpoints_right, mtx1, dist1,
+                                                                 mtx2, dist2, (width, height), criteria = criteria, flags = stereocalibration_flags)
+ 
+    print(ret)
+    return ret, K1, dist1, K2, dist2, R, T, E, F
+
+images_names = sorted(glob.glob("D0/*"))
+im = cv2.imread(images_names[0], cv2.IMREAD_GRAYSCALE)
+imageSize = im.shape[::-1]
+ 
+mtx1, dist1 = calibrate_camera(images_folder = 'D0/*')
+mtx2, dist2 = calibrate_camera(images_folder = 'D2/*')
+
+ret, K1, D1, K2, D2, R, T, E, F = stereo_calibrate(mtx1, dist1, mtx2, dist2, 'D0/*', 'D2/*')
+
+R1, R2, P1, P2, Q, roi1, roi2 = cv2.stereoRectify(K1, D1, K2, D2, imageSize, R, T, flags=cv2.CALIB_ZERO_DISPARITY, alpha=0)
+
+map1x, map1y = cv2.initUndistortRectifyMap(
+    K1, D1, R1, P1, imageSize, cv2.CV_32FC1
+)
+
+map2x, map2y = cv2.initUndistortRectifyMap(
+    K2, D2, R2, P2, imageSize, cv2.CV_32FC1
+)
+
+
+# do remapping based on grid findings
+imgs_l = sorted(glob.glob("rect/in/left/*"))
+imgs_r = sorted(glob.glob("rect/in/right/*"))
+i = 0
+for img_l, img_r in zip(imgs_l, imgs_r):
+    imL = cv2.imread(img_l, cv2.IMREAD_GRAYSCALE)
+    imR = cv2.imread(img_r, cv2.IMREAD_GRAYSCALE)
+
+    left_rect  = cv2.remap(imL,  map1x, map1y, cv2.INTER_LINEAR)
+    right_rect = cv2.remap(imR, map2x, map2y, cv2.INTER_LINEAR)
+
+    cv2.imwrite(f"/home/dell-user/Software/robo_sub/rect/out/left/left_rectified_img_{i}.png", left_rect)
+    cv2.imwrite(f"/home/dell-user/Software/robo_sub/rect/out/right/right_rectified_img_{i}.png", right_rect)
+    i+=1
+
+
+# create depth map
+img_path0 = "/home/dell-user/Software/robo_sub/rect/out/left/left_rectified_img_0.png" # left
+img_path1 = "/home/dell-user/Software/robo_sub/rect/out/right/right_rectified_img_0.png" # right
+
+img0 = cv2.imread(img_path0, cv2.IMREAD_GRAYSCALE)
+img1 = cv2.imread(img_path1, cv2.IMREAD_GRAYSCALE)
+
+stereo = cv2.StereoSGBM_create(numDisparities=128, blockSize=15)
+disparity = stereo.compute(img0, img1).astype(np.float32) / 16.0
+out_image1  = cv2.normalize(disparity, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+
+for y in range(0, img0.shape[0], 40):
+    cv2.line(img0, (0,y), (img0.shape[1],y), 255, 1)
+    cv2.line(img1,(0,y), (img0.shape[1],y), 255, 1)
+
+
+print("Baseline (m):", np.linalg.norm(T))
+
+cv2.imshow("numDisparities_BM 128, block 15", out_image1)
+
+cv2.imshow("alignment lef", img0)
+cv2.imshow("alignment right", img1)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
