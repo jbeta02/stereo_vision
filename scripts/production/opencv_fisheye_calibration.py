@@ -33,10 +33,9 @@ def calibrate_camera(images_folder, calibration_parameters):
     objpoints = [] # 3d point in real world space
  
     for frame in images:
-        gray = frame
  
         # find the checkerboard
-        ret, corners = cv2.findChessboardCorners(gray, shape, None)
+        ret, corners = cv2.findChessboardCorners(frame, shape, None)
  
         if ret == True:
  
@@ -44,7 +43,7 @@ def calibrate_camera(images_folder, calibration_parameters):
             conv_size = (3, 3)
  
             # opencv can attempt to improve the checkerboard coordinates
-            corners = cv2.cornerSubPix(gray, corners, conv_size, (-1, -1), criteria)
+            corners = cv2.cornerSubPix(frame, corners, conv_size, (-1, -1), criteria)
             cv2.drawChessboardCorners(frame, shape, corners, ret)
  
             objpoints.append(objp)

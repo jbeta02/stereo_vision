@@ -66,10 +66,10 @@ for y in range(0, img0.shape[0], 40):
 
 print("Baseline (m):", np.linalg.norm(T))
 
-# cv2.imshow("numDisparities_BM 128, block 15", out_image1)
-# cv2.imshow("alignment lef", img0)
-# cv2.imshow("alignment right", img1)
+cv2.imshow("numDisparities_BM 128, block 15", out_image1)
+cv2.imshow("alignment lef", img0)
+cv2.imshow("alignment right", img1)
 
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 

@@ -34,18 +34,17 @@ def calibrate_camera(images_folder, calibration_parameters):
  
 
     for frame in images:
-        gray = frame
  
         # find the checkerboard
-        ret, corners = cv2.findChessboardCorners(gray, shape, None)
+        ret, corners = cv2.findChessboardCorners(frame, shape, None)
  
         if ret == True:
  
             # convolution size used to improve corner detection. Don't make this too large.
-            conv_size = (11, 11)
+            conv_size = (3, 3)
  
             # opencv can attempt to improve the checkerboard coordinates
-            corners = cv2.cornerSubPix(gray, corners, conv_size, (-1, -1), criteria)
+            corners = cv2.cornerSubPix(frame, corners, conv_size, (-1, -1), criteria)
             cv2.drawChessboardCorners(frame, shape, corners, ret)
  
             objpoints.append(objp)
@@ -109,8 +108,9 @@ def stereo_calibrate(mtx1, dist1, mtx2, dist2, left_images, right_images, calibr
         c_ret2, corners2 = cv2.findChessboardCorners(frame2, shape, None)
  
         if c_ret1 == True and c_ret2 == True:
-            corners1 = cv2.cornerSubPix(frame1, corners1, (11, 11), (-1, -1), criteria)
-            corners2 = cv2.cornerSubPix(frame2, corners2, (11, 11), (-1, -1), criteria)
+            conv_size = (3, 3)
+            corners1 = cv2.cornerSubPix(frame1, corners1, conv_size, (-1, -1), criteria)
+            corners2 = cv2.cornerSubPix(frame2, corners2, conv_size, (-1, -1), criteria)
  
             cv2.drawChessboardCorners(frame1, shape, corners1, c_ret1)
             cv2.drawChessboardCorners(frame2, shape, corners2, c_ret2)
