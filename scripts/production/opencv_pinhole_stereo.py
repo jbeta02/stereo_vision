@@ -70,7 +70,7 @@ def build_disparity_map(
     img1 = cv2.imread(img_path1, cv2.IMREAD_GRAYSCALE)
 
     # stereo = cv2.StereoSGBM_create(numDisparities=128, blockSize=15)
-    channels = 3 # since using grayscale use 1
+    channels = 1 # since using grayscale use 1
     stereo = cv2.StereoSGBM_create(
         minDisparity=minDisparity,
         numDisparities=numDisparities,
@@ -83,7 +83,7 @@ def build_disparity_map(
         speckleRange=speckleRange
     )
     disparity = stereo.compute(img0, img1).astype(np.float32) / 16.0
-    map  = cv2.normalize(disparity, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+    map = cv2.normalize(disparity, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
 
     return map
 

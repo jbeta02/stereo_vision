@@ -16,7 +16,7 @@ opencv_pinhole_stereo.rectify_images()
 # default
 current_minDisparity=0
 current_numDisparities=64
-current_blockSize=9
+current_blockSize=15
 current_disp12MaxDiff=1
 current_uniquenessRatio=7
 current_speckleWindowSize=100
