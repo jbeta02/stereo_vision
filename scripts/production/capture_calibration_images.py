@@ -20,6 +20,7 @@ def capture_test_image(device): # device is device number ex: 0
 
     # Capture frame-by-frame
     ret, frame = cap.read()
+    cap.release()
 
     return frame
 
@@ -49,7 +50,7 @@ def draw_chess_single_cam(frame):
     if ret == True:
 
         # convolution size used to improve corner detection. Don't make this too large.
-        conv_size = (11, 11)
+        conv_size = (3, 3)
 
         # opencv can attempt to improve the checkerboard coordinates
         corners = cv2.cornerSubPix(gray, corners, conv_size, (-1, -1), criteria)

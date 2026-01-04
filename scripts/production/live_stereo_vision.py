@@ -4,9 +4,11 @@ import numpy as np
 from pathlib import Path
 import image_capture
 
-while True:
+cap0, cap1 = image_capture.camera_setup(0, 2)
 
-    frame0, frame1, cap0, cap1 = image_capture.capture(0, 2)
+while True:
+    ret0, frame0 = cap0.read()
+    ret1, frame1 = cap1.read()
     frame0 = cv2.cvtColor(frame0, cv2.COLOR_BGR2GRAY)
     frame1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
 
@@ -41,12 +43,12 @@ while True:
     channels = 1 # since using grayscale use 1
     stereo = cv2.StereoSGBM_create(
         minDisparity=0,
-        numDisparities=64,
-        blockSize=15,
-        P1=8 * channels * 15**2, # recommended openCV formula
-        P2=32 * channels * 15**2, # recommended openCV formula
+        numDisparities=128,
+        blockSize=10,
+        P1=8 * channels * 10**2, # recommended openCV formula
+        P2=32 * channels * 10**2, # recommended openCV formula
         disp12MaxDiff=1,
-        uniquenessRatio=7,
+        uniquenessRatio=2,
         speckleWindowSize=100,
         speckleRange=2
     )
