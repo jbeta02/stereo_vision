@@ -13,6 +13,8 @@ while True:
     frame1 = cv2.cvtColor(frame1, cv2.COLOR_BGR2GRAY)
 
     data = np.load("test_images/out/stereo_calibration_pinhole.npz")
+    # data = np.load("test_images/out/stereo_calibration_fisheye.npz")
+
 
     K1 = data["K1"]
     D1 = data["D1"]
@@ -36,18 +38,28 @@ while True:
         K2, D2, R2, P2, imageSize, cv2.CV_32FC1
     )
 
+    # commented code is for fisheye lens
+#     map1x, map1y = cv2.fisheye.initUndistortRectifyMap(
+#     K1, D1, R1, P1[:, :3], imageSize, cv2.CV_16SC2
+# )
+
+#     map2x, map2y = cv2.fisheye.initUndistortRectifyMap(
+#         K2, D2, R2, P2[:, :3], imageSize, cv2.CV_16SC2
+#     )
+
+
     frame0 = cv2.remap(frame0,  map1x, map1y, cv2.INTER_LINEAR)
     frame1 = cv2.remap(frame1,  map1x, map1y, cv2.INTER_LINEAR)
 
     channels = 1 # since using grayscale use 1
     stereo = cv2.StereoSGBM_create(
         minDisparity=0,
-        numDisparities=128,
+        numDisparities=128, # 128
         blockSize=10,
         P1=8 * channels * 10**2, # recommended openCV formula
         P2=32 * channels * 10**2, # recommended openCV formula
         disp12MaxDiff=1,
-        uniquenessRatio=2,
+        uniquenessRatio=2, # 2
         speckleWindowSize=100,
         speckleRange=2
     )
