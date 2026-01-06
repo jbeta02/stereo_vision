@@ -15,7 +15,6 @@ while True:
     data = np.load("test_images/out/stereo_calibration_pinhole.npz")
     # data = np.load("test_images/out/stereo_calibration_fisheye.npz")
 
-
     K1 = data["K1"]
     D1 = data["D1"]
     K2 = data["K2"]
@@ -47,9 +46,8 @@ while True:
 #         K2, D2, R2, P2[:, :3], imageSize, cv2.CV_16SC2
 #     )
 
-
     frame0 = cv2.remap(frame0,  map1x, map1y, cv2.INTER_LINEAR)
-    frame1 = cv2.remap(frame1,  map1x, map1y, cv2.INTER_LINEAR)
+    frame1 = cv2.remap(frame1,  map2x, map2y, cv2.INTER_LINEAR)
 
     channels = 1 # since using grayscale use 1
     stereo = cv2.StereoSGBM_create(
