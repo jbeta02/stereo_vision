@@ -1,8 +1,11 @@
-
+I implemented my own stereo vision software from what I learned in the video series https://www.youtube.com/watch?v=S-UHiFsn-GI&list=PL2zRqk16wsdoCCLpou-dGo7QQNks1Ppzo&index=1. 
+I also implemented a version relying on openCV for greater optimization and performance compared to my approach. Below is a demo showing a disparity map of the live stereo vision. 
 
 
 [Screencast from 2026-01-03 16-42-22.webm](https://github.com/user-attachments/assets/c0932cb7-2033-43f2-8a20-b8de5cfe7a81)
 
+
+#### Reference comands:
 source .venv/bin/activate
 
 sudo guvcview
