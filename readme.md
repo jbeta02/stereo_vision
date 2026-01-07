@@ -1,3 +1,8 @@
+
+
+
+[Screencast from 2026-01-03 16-42-22.webm](https://github.com/user-attachments/assets/c0932cb7-2033-43f2-8a20-b8de5cfe7a81)
+
 source .venv/bin/activate
 
 sudo guvcview
