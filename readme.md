@@ -1,4 +1,6 @@
-I implemented my own stereo vision software from what I learned in the video series https://www.youtube.com/watch?v=S-UHiFsn-GI&list=PL2zRqk16wsdoCCLpou-dGo7QQNks1Ppzo&index=1. 
+# See finalized version with full README documentation at [RoboSub](https://github.com/hornet-robotics/robosub)
+
+I implemented my own stereo vision software from what I learned in [this video series](https://www.youtube.com/watch?v=S-UHiFsn-GI&list=PL2zRqk16wsdoCCLpou-dGo7QQNks1Ppzo&index=1). 
 I also implemented a version relying on openCV for greater optimization and performance compared to my approach. Below is a demo showing a disparity map of the live stereo vision. 
 
 
